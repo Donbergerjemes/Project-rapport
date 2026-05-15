@@ -1,0 +1,1361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hotel Management System — Technical Report</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gold: #C9A84C;
+    --gold-light: #E8C97A;
+    --gold-pale: #F5EDD6;
+    --navy: #0D1B2A;
+    --navy-mid: #1A2E44;
+    --navy-light: #243B55;
+    --cream: #FAF7F0;
+    --text: #1C1C2E;
+    --text-muted: #5A5A7A;
+    --white: #FFFFFF;
+    --accent-red: #C0392B;
+    --accent-green: #1A7A4A;
+    --accent-blue: #1565C0;
+    --border: rgba(201,168,76,0.25);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    color: var(--text);
+    line-height: 1.7;
+  }
+
+  /* ── COVER ── */
+  .cover {
+    background: var(--navy);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    padding: 60px 40px;
+  }
+
+  .cover::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: 
+      radial-gradient(ellipse 80% 60% at 20% 80%, rgba(201,168,76,0.12) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 80% at 80% 20%, rgba(21,101,192,0.08) 0%, transparent 60%);
+  }
+
+  .cover-grid {
+    position: absolute;
+    inset: 0;
+    background-image: 
+      linear-gradient(rgba(201,168,76,0.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(201,168,76,0.06) 1px, transparent 1px);
+    background-size: 60px 60px;
+  }
+
+  .cover-ornament {
+    position: absolute;
+    top: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    opacity: 0.5;
+  }
+
+  .ornament-line {
+    width: 80px;
+    height: 1px;
+    background: var(--gold);
+  }
+
+  .ornament-diamond {
+    width: 8px;
+    height: 8px;
+    background: var(--gold);
+    transform: rotate(45deg);
+  }
+
+  .cover-content {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    max-width: 800px;
+  }
+
+  .cover-tag {
+    display: inline-block;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--gold);
+    border: 1px solid rgba(201,168,76,0.4);
+    padding: 6px 20px;
+    border-radius: 2px;
+    margin-bottom: 40px;
+  }
+
+  .cover h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(42px, 7vw, 80px);
+    font-weight: 900;
+    color: var(--white);
+    line-height: 1.05;
+    margin-bottom: 8px;
+  }
+
+  .cover h1 em {
+    color: var(--gold);
+    font-style: italic;
+  }
+
+  .cover-subtitle {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(16px, 3vw, 24px);
+    color: rgba(255,255,255,0.6);
+    font-weight: 400;
+    margin-bottom: 50px;
+    font-style: italic;
+  }
+
+  .cover-divider {
+    width: 120px;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    margin: 0 auto 50px;
+  }
+
+  .cover-meta {
+    display: flex;
+    justify-content: center;
+    gap: 60px;
+    flex-wrap: wrap;
+  }
+
+  .meta-item {
+    text-align: center;
+  }
+
+  .meta-label {
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--gold);
+    font-family: 'DM Mono', monospace;
+    margin-bottom: 6px;
+  }
+
+  .meta-value {
+    font-size: 15px;
+    color: rgba(255,255,255,0.85);
+    font-weight: 500;
+  }
+
+  .cover-bottom {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, transparent, var(--gold), var(--gold-light), var(--gold), transparent);
+  }
+
+  /* ── NAVIGATION ── */
+  .toc-nav {
+    background: var(--navy-mid);
+    padding: 50px 40px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .toc-nav-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 30px;
+    flex-wrap: wrap;
+  }
+
+  .toc-nav-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--gold);
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .toc-nav a {
+    color: rgba(255,255,255,0.6);
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 6px 14px;
+    border-radius: 4px;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  .toc-nav a:hover {
+    color: var(--gold);
+    background: rgba(201,168,76,0.1);
+  }
+
+  /* ── MAIN LAYOUT ── */
+  .report-body {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 80px 40px;
+  }
+
+  /* ── SECTION HEADERS ── */
+  .section {
+    margin-bottom: 80px;
+  }
+
+  .section-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 3px;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .section-label::before {
+    content: '';
+    display: block;
+    width: 30px;
+    height: 1px;
+    background: var(--gold);
+  }
+
+  .section h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(28px, 4vw, 42px);
+    font-weight: 700;
+    color: var(--navy);
+    line-height: 1.2;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid var(--gold-pale);
+  }
+
+  .section h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--navy);
+    margin-bottom: 16px;
+    margin-top: 40px;
+  }
+
+  p {
+    color: var(--text-muted);
+    font-size: 16px;
+    line-height: 1.8;
+    margin-bottom: 16px;
+  }
+
+  /* ── INTRO HERO ── */
+  .intro-hero {
+    background: var(--navy);
+    border-radius: 16px;
+    padding: 60px;
+    margin-bottom: 50px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .intro-hero::after {
+    content: '🏨';
+    position: absolute;
+    right: 50px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 100px;
+    opacity: 0.08;
+  }
+
+  .intro-hero p {
+    color: rgba(255,255,255,0.75);
+    font-size: 18px;
+    max-width: 650px;
+  }
+
+  .intro-hero h3 {
+    color: var(--gold);
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    letter-spacing: 2px;
+    margin-bottom: 16px;
+    margin-top: 0;
+  }
+
+  /* ── STATS GRID ── */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 20px;
+    margin-bottom: 50px;
+  }
+
+  .stat-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 28px 24px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .stat-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 30px rgba(13,27,42,0.1);
+  }
+
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--gold);
+  }
+
+  .stat-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 42px;
+    font-weight: 900;
+    color: var(--navy);
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+
+  .stat-label {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-weight: 500;
+    letter-spacing: 0.5px;
+  }
+
+  /* ── ARCHITECTURE DIAGRAM ── */
+  .arch-diagram {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 50px 40px;
+    margin-bottom: 40px;
+  }
+
+  .arch-layers {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .arch-layer {
+    border-radius: 10px;
+    padding: 20px 28px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .arch-layer.frontend { background: linear-gradient(135deg, #E8F4FD, #D1EAFB); border-left: 4px solid #1565C0; }
+  .arch-layer.backend  { background: linear-gradient(135deg, #E8F6EE, #D1F0DE); border-left: 4px solid #1A7A4A; }
+  .arch-layer.data     { background: linear-gradient(135deg, #FEF3E2, #FDE8C0); border-left: 4px solid #C9A84C; }
+
+  .arch-icon { font-size: 28px; flex-shrink: 0; }
+
+  .arch-layer-title {
+    font-weight: 700;
+    font-size: 15px;
+    color: var(--navy);
+    margin-bottom: 4px;
+  }
+
+  .arch-layer-desc {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin: 0;
+  }
+
+  .arch-arrow {
+    text-align: center;
+    color: var(--gold);
+    font-size: 20px;
+    margin: -4px 0;
+  }
+
+  /* ── MODULE CARDS ── */
+  .modules-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 24px;
+    margin-bottom: 50px;
+  }
+
+  .module-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 32px 28px;
+    transition: box-shadow 0.2s;
+    position: relative;
+  }
+
+  .module-card:hover {
+    box-shadow: 0 8px 24px rgba(13,27,42,0.08);
+  }
+
+  .module-icon {
+    font-size: 32px;
+    margin-bottom: 16px;
+    display: block;
+  }
+
+  .module-card h4 {
+    font-family: 'Playfair Display', serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--navy);
+    margin-bottom: 10px;
+  }
+
+  .module-file {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--gold);
+    letter-spacing: 0.5px;
+    margin-bottom: 12px;
+  }
+
+  .module-card p {
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--text-muted);
+    margin: 0;
+  }
+
+  /* ── DATABASE TABLES ── */
+  .db-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+    margin-bottom: 40px;
+  }
+
+  .db-table-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .db-table-header {
+    background: var(--navy);
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .db-table-header span {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--gold);
+  }
+
+  .db-table-header small {
+    color: rgba(255,255,255,0.45);
+    font-size: 11px;
+    margin-left: auto;
+  }
+
+  .db-fields {
+    padding: 16px 20px;
+  }
+
+  .db-field {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 7px 0;
+    border-bottom: 1px solid rgba(201,168,76,0.1);
+    font-size: 13px;
+  }
+
+  .db-field:last-child { border-bottom: none; }
+
+  .field-name {
+    font-family: 'DM Mono', monospace;
+    color: var(--navy);
+    font-size: 12px;
+  }
+
+  .field-type {
+    font-size: 11px;
+    color: var(--text-muted);
+    background: var(--cream);
+    padding: 2px 8px;
+    border-radius: 4px;
+  }
+
+  .field-pk {
+    color: var(--gold);
+    font-size: 10px;
+    font-weight: 700;
+    margin-right: 4px;
+  }
+
+  /* ── FINDINGS (SECURITY) ── */
+  .findings-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-bottom: 40px;
+  }
+
+  .finding {
+    border-radius: 12px;
+    padding: 24px 28px;
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+    border: 1px solid transparent;
+  }
+
+  .finding.critical {
+    background: #FEF2F2;
+    border-color: rgba(192,57,43,0.2);
+  }
+
+  .finding.warning {
+    background: #FFFBEB;
+    border-color: rgba(201,168,76,0.3);
+  }
+
+  .finding.info {
+    background: #EFF6FF;
+    border-color: rgba(21,101,192,0.2);
+  }
+
+  .finding.positive {
+    background: #F0FDF4;
+    border-color: rgba(26,122,74,0.2);
+  }
+
+  .finding-badge {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 4px;
+    white-space: nowrap;
+    flex-shrink: 0;
+    margin-top: 2px;
+    font-family: 'DM Mono', monospace;
+  }
+
+  .critical .finding-badge { background: var(--accent-red); color: white; }
+  .warning  .finding-badge { background: var(--gold); color: white; }
+  .info     .finding-badge { background: var(--accent-blue); color: white; }
+  .positive .finding-badge { background: var(--accent-green); color: white; }
+
+  .finding-content h5 {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--navy);
+    margin-bottom: 6px;
+    line-height: 1.4;
+  }
+
+  .finding-content p {
+    font-size: 14px;
+    margin: 0;
+    color: var(--text-muted);
+  }
+
+  /* ── CODE BLOCK ── */
+  .code-block {
+    background: var(--navy);
+    border-radius: 10px;
+    padding: 28px 32px;
+    margin: 20px 0 30px;
+    overflow-x: auto;
+    position: relative;
+  }
+
+  .code-block::before {
+    content: attr(data-lang);
+    position: absolute;
+    top: 10px;
+    right: 16px;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--gold);
+    letter-spacing: 1px;
+  }
+
+  .code-block code {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    color: #E8D5A3;
+    line-height: 1.7;
+    white-space: pre;
+  }
+
+  .code-comment { color: #6B8A6B; }
+  .code-keyword { color: #82AAFF; }
+  .code-string  { color: #C3E88D; }
+  .code-fn      { color: #F78C6C; }
+
+  /* ── TECH STACK TABLE ── */
+  .tech-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    margin-bottom: 40px;
+  }
+
+  .tech-table th {
+    background: var(--navy);
+    color: var(--gold);
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 14px 20px;
+    text-align: left;
+    font-weight: 500;
+  }
+
+  .tech-table td {
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border);
+    font-size: 14px;
+    color: var(--text);
+    background: var(--white);
+    vertical-align: middle;
+  }
+
+  .tech-table tr:last-child td { border-bottom: none; }
+
+  .tech-table tr:hover td { background: var(--gold-pale); }
+
+  .tech-badge {
+    display: inline-block;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-weight: 500;
+  }
+
+  .badge-php     { background: #7B5EA7; color: white; }
+  .badge-mysql   { background: #00758F; color: white; }
+  .badge-js      { background: #F0DB4F; color: #222; }
+  .badge-css     { background: #2965F1; color: white; }
+  .badge-html    { background: #E34C26; color: white; }
+  .badge-lib     { background: #6D6D6D; color: white; }
+
+  /* ── RECOMMENDATIONS ── */
+  .rec-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+    margin-bottom: 50px;
+  }
+
+  .rec-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 28px 24px;
+  }
+
+  .rec-number {
+    font-family: 'Playfair Display', serif;
+    font-size: 48px;
+    font-weight: 900;
+    color: var(--gold-pale);
+    line-height: 1;
+    margin-bottom: 12px;
+  }
+
+  .rec-card h4 {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--navy);
+    margin-bottom: 8px;
+  }
+
+  .rec-card p {
+    font-size: 14px;
+    color: var(--text-muted);
+    margin: 0;
+  }
+
+  .priority-tag {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 3px 10px;
+    border-radius: 4px;
+    margin-bottom: 12px;
+    font-family: 'DM Mono', monospace;
+  }
+
+  .priority-high   { background: #FEE2E2; color: var(--accent-red); }
+  .priority-medium { background: #FEF3C7; color: #92400E; }
+  .priority-low    { background: #DCFCE7; color: #166534; }
+
+  /* ── FOOTER ── */
+  .report-footer {
+    background: var(--navy);
+    padding: 60px 40px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .report-footer::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  }
+
+  .footer-logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--white);
+    margin-bottom: 12px;
+  }
+
+  .footer-logo em { color: var(--gold); font-style: italic; }
+
+  .report-footer p {
+    color: rgba(255,255,255,0.4);
+    font-size: 14px;
+    margin: 0;
+  }
+
+  /* ── PRINT ── */
+  @media print {
+    .toc-nav { display: none; }
+    .cover { page-break-after: always; min-height: auto; padding: 40px; }
+  }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .cover-content { animation: fadeUp 1s ease both; }
+  .cover-meta    { animation: fadeUp 1.2s ease both; }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════ COVER ══════════════════════ -->
+<section class="cover">
+  <div class="cover-grid"></div>
+  <div class="cover-ornament">
+    <div class="ornament-line"></div>
+    <div class="ornament-diamond"></div>
+    <div class="ornament-line"></div>
+  </div>
+  <div class="cover-content">
+    <div class="cover-tag">Technical Project Report</div>
+    <h1><em>Hotel</em> Management<br>System</h1>
+    <p class="cover-subtitle">A full-stack PHP web application for hospitality operations</p>
+    <div class="cover-divider"></div>
+    <div class="cover-meta">
+      <div class="meta-item">
+        <div class="meta-label">Platform</div>
+        <div class="meta-value">PHP 8 + MySQL</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">Total Files</div>
+        <div class="meta-value">19 Files Analyzed</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">Report Date</div>
+        <div class="meta-value">May 2026</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">Database</div>
+        <div class="meta-value">hotel_db (MariaDB)</div>
+      </div>
+    </div>
+  </div>
+  <div class="cover-bottom"></div>
+</section>
+
+<!-- ══════════════════════ NAV ══════════════════════ -->
+<nav class="toc-nav">
+  <div class="toc-nav-inner">
+    <span class="toc-nav-label">Contents</span>
+    <a href="#overview">Overview</a>
+    <a href="#architecture">Architecture</a>
+    <a href="#modules">Modules</a>
+    <a href="#database">Database</a>
+    <a href="#security">Security</a>
+    <a href="#recommendations">Recommendations</a>
+  </div>
+</nav>
+
+<!-- ══════════════════════ BODY ══════════════════════ -->
+<div class="report-body">
+
+  <!-- 1 — OVERVIEW -->
+  <section class="section" id="overview">
+    <div class="section-label">01 — Introduction</div>
+    <h2>Project Overview</h2>
+
+    <div class="intro-hero">
+      <h3>▸ Executive Summary</h3>
+      <p>The Hotel Management System is a fully server-rendered PHP web application designed to allow hotel administrators to manage the complete guest lifecycle — from booking creation through check-in, service assignment, payment, and feedback collection.</p>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-num">19</div>
+        <div class="stat-label">Total Source Files</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">8</div>
+        <div class="stat-label">Database Tables</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">14</div>
+        <div class="stat-label">PHP Endpoints</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">3</div>
+        <div class="stat-label">JavaScript Modules</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">5</div>
+        <div class="stat-label">Active Staff Records</div>
+      </div>
+    </div>
+
+    <h3>Project Goals</h3>
+    <p>The system targets small-to-medium hotel operations and provides a centralized admin dashboard covering reservations, occupancy tracking, ancillary services, employee records, and guest satisfaction. The front-end delivers a responsive Bootstrap 5 interface with real-time price calculations driven by vanilla JavaScript XHR calls, while the back-end is a classical LAMP-stack (PHP + MariaDB).</p>
+
+    <table class="tech-table">
+      <thead>
+        <tr>
+          <th>Layer</th>
+          <th>Technology</th>
+          <th>Version / Notes</th>
+          <th>Role</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Server Language</td>
+          <td><span class="tech-badge badge-php">PHP</span></td>
+          <td>8.0.30</td>
+          <td>All server-side logic and HTML rendering</td>
+        </tr>
+        <tr>
+          <td>Database</td>
+          <td><span class="tech-badge badge-mysql">MariaDB</span></td>
+          <td>10.4.32</td>
+          <td>Relational data store (hotel_db)</td>
+        </tr>
+        <tr>
+          <td>Markup</td>
+          <td><span class="tech-badge badge-html">HTML5</span></td>
+          <td>—</td>
+          <td>Semantic structure embedded in PHP templates</td>
+        </tr>
+        <tr>
+          <td>Styling</td>
+          <td><span class="tech-badge badge-css">Bootstrap 5.3</span></td>
+          <td>CDN</td>
+          <td>Responsive grid, components, utilities</td>
+        </tr>
+        <tr>
+          <td>Custom Styles</td>
+          <td><span class="tech-badge badge-css">CSS3</span></td>
+          <td>styles.css</td>
+          <td>Sidebar, stat cards, status badges</td>
+        </tr>
+        <tr>
+          <td>Interactivity</td>
+          <td><span class="tech-badge badge-js">JavaScript</span></td>
+          <td>ES6 (Vanilla)</td>
+          <td>Price calc, form validation, XHR booking</td>
+        </tr>
+        <tr>
+          <td>Alerts</td>
+          <td><span class="tech-badge badge-lib">SweetAlert2</span></td>
+          <td>CDN</td>
+          <td>Confirmation dialogs and success modals</td>
+        </tr>
+        <tr>
+          <td>Icons</td>
+          <td><span class="tech-badge badge-lib">Font Awesome 6</span></td>
+          <td>CDN</td>
+          <td>UI icon library throughout all pages</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- 2 — ARCHITECTURE -->
+  <section class="section" id="architecture">
+    <div class="section-label">02 — Design</div>
+    <h2>System Architecture</h2>
+
+    <p>The system follows a classic monolithic MVC-adjacent pattern where PHP files serve as both controllers and views. There is no framework — routing is handled by direct URL file access. All pages include <code>db.php</code> for the database connection and start a session to enforce admin authentication.</p>
+
+    <div class="arch-diagram">
+      <div class="arch-layers">
+        <div class="arch-layer frontend">
+          <div class="arch-icon">🌐</div>
+          <div>
+            <div class="arch-layer-title">Presentation Layer</div>
+            <p class="arch-layer-desc">Bootstrap 5 HTML templates embedded in PHP. Three JS modules: <code>scripts.js</code>, <code>ajax.js</code>, <code>login.js</code>. SweetAlert2 for UX dialogs. Font Awesome icons. Custom <code>styles.css</code>.</p>
+          </div>
+        </div>
+        <div class="arch-arrow">↕</div>
+        <div class="arch-layer backend">
+          <div class="arch-icon">⚙️</div>
+          <div>
+            <div class="arch-layer-title">Application Layer (PHP)</div>
+            <p class="arch-layer-desc">14 PHP files handling authentication, CRUD operations, session management, and business rules (double-booking prevention, occupancy limits, payment status). No MVC framework — files act as combined controller + view.</p>
+          </div>
+        </div>
+        <div class="arch-arrow">↕</div>
+        <div class="arch-layer data">
+          <div class="arch-icon">🗄️</div>
+          <div>
+            <div class="arch-layer-title">Data Layer (MariaDB)</div>
+            <p class="arch-layer-desc">8 tables: <code>admins</code>, <code>clients</code>, <code>client_services</code>, <code>services</code>, <code>rooms</code>, <code>floors</code>, <code>staff</code>, <code>feedback</code>. MySQLi extension with a mix of prepared statements and raw queries.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <h3>Request Flow</h3>
+    <p>Every browser request goes directly to a PHP file. Pages that require authentication check <code>$_SESSION['admin_id']</code> at the top and redirect to <code>login.php</code> if absent. AJAX calls (booking save, check-in/out, service payment) are handled by dedicated endpoint files and return plain-text tokens (<code>Success</code>, <code>DoubleBooking</code>, <code>Error</code>) consumed by JavaScript.</p>
+
+    <div class="code-block" data-lang="FLOW">
+      <code><span class="code-comment"># Typical authenticated page request</span>
+Browser ──GET──▶ dashboard.php
+                  │  include db.php (open MySQL connection)
+                  │  session_start() + check $_SESSION['admin_id']
+                  │  Run SQL queries (bookings, stats, rooms)
+                  └──▶ Render HTML with embedded PHP data
+
+<span class="code-comment"># AJAX booking save</span>
+Browser ──POST──▶ book.php
+                  │  Validate POST fields
+                  │  Check double-booking (SQL SELECT)
+                  │  INSERT or UPDATE clients table
+                  └──▶ echo 'Success' | 'DoubleBooking' | 'Error'</code>
+    </div>
+  </section>
+
+  <!-- 3 — MODULES -->
+  <section class="section" id="modules">
+    <div class="section-label">03 — Components</div>
+    <h2>Application Modules</h2>
+
+    <div class="modules-grid">
+      <div class="module-card">
+        <span class="module-icon">🔐</span>
+        <h4>Authentication</h4>
+        <div class="module-file">login.php · register.php · logout.php · login.js</div>
+        <p>SHA-256 password hashing for admin login. Register enforces a strong-password regex (uppercase, lowercase, digit, special char, min 8 chars). Logout destroys the session. <code>login.js</code> handles Enter-key navigation between fields.</p>
+      </div>
+
+      <div class="module-card">
+        <span class="module-icon">📅</span>
+        <h4>Booking Management</h4>
+        <div class="module-file">book.php · booking.php · ajax.js · scripts.js</div>
+        <p>Create and update guest reservations with room type, occupancy (adults/children), date range, and price. Double-booking is prevented server-side with an overlapping date query. Two near-duplicate PHP files exist (book.php / booking.php) that should be consolidated.</p>
+      </div>
+
+      <div class="module-card">
+        <span class="module-icon">🏠</span>
+        <h4>Check-in / Check-out</h4>
+        <div class="module-file">checkin.php · update_check_status.php</div>
+        <p>Two endpoints update the <code>check_in_status</code> enum. <code>checkin.php</code> also records <code>actual_check_in_time</code> and <code>actual_check_out_time</code> timestamps. Both are session-protected and use prepared statements.</p>
+      </div>
+
+      <div class="module-card">
+        <span class="module-icon">💳</span>
+        <h4>Payment & Invoicing</h4>
+        <div class="module-file">checkout.php · invoice.php · pay_service.php</div>
+        <p><code>checkout.php</code> presents a card form that marks a booking as Paid. <code>invoice.php</code> renders a printable receipt and auto-triggers the browser print dialog. <code>pay_service.php</code> marks individual service charges as Paid.</p>
+      </div>
+
+      <div class="module-card">
+        <span class="module-icon">🛎️</span>
+        <h4>Services Module</h4>
+        <div class="module-file">services.php · pay_service.php</div>
+        <p>Hotel services (Breakfast, Laundry, Room Service, etc.) can be created and managed. Services are bookable at reservation time via checkboxes. Prices aggregate automatically in the front-end calculator, and service-level payment tracking is separate from the room charge.</p>
+      </div>
+
+      <div class="module-card">
+        <span class="module-icon">👥</span>
+        <h4>Staff Management</h4>
+        <div class="module-file">staff.php</div>
+        <p>Full CRUD for hotel employees with fields for name, position, email, phone, hire date, salary, and active/inactive status. Displays a staff roster table within the admin dashboard sidebar layout.</p>
+      </div>
+
+      <div class="module-card">
+        <span class="module-icon">⭐</span>
+        <h4>Guest Feedback</h4>
+        <div class="module-file">feedback.php</div>
+        <p>Admins can log 1–5 star ratings with comments linked to a guest record. Displays average rating and total review count. The feedback table is auto-created if absent (DDL on first page load). Feedback rows are deleted via a POST form with confirmation.</p>
+      </div>
+
+      <div class="module-card">
+        <span class="module-icon">📊</span>
+        <h4>Dashboard</h4>
+        <div class="module-file">dashboard.php</div>
+        <p>Central admin hub showing stat cards (total bookings, revenue, occupancy), a full bookings table with inline check-in/out and payment actions, and the booking creation/edit modal powered by JavaScript.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4 — DATABASE -->
+  <section class="section" id="database">
+    <div class="section-label">04 — Data</div>
+    <h2>Database Schema</h2>
+
+    <p>The <code>hotel_db</code> MariaDB database contains 8 tables. Foreign keys with <code>ON DELETE CASCADE</code> are used for <code>client_services</code> and <code>feedback</code> to maintain referential integrity when client records are removed.</p>
+
+    <div class="db-grid">
+      <div class="db-table-card">
+        <div class="db-table-header">
+          <span>admins</span>
+          <small>1 row</small>
+        </div>
+        <div class="db-fields">
+          <div class="db-field"><span class="field-name"><span class="field-pk">PK</span>id</span><span class="field-type">int</span></div>
+          <div class="db-field"><span class="field-name">username</span><span class="field-type">varchar(50) UNIQUE</span></div>
+          <div class="db-field"><span class="field-name">password</span><span class="field-type">varchar(255) SHA-256</span></div>
+        </div>
+      </div>
+
+      <div class="db-table-card">
+        <div class="db-table-header">
+          <span>clients</span>
+          <small>Core table</small>
+        </div>
+        <div class="db-fields">
+          <div class="db-field"><span class="field-name"><span class="field-pk">PK</span>id</span><span class="field-type">int</span></div>
+          <div class="db-field"><span class="field-name">full_name, email</span><span class="field-type">varchar</span></div>
+          <div class="db-field"><span class="field-name">room_type, room_number</span><span class="field-type">varchar / int</span></div>
+          <div class="db-field"><span class="field-name">check_in, check_out</span><span class="field-type">date</span></div>
+          <div class="db-field"><span class="field-name">total_price</span><span class="field-type">decimal(10,2)</span></div>
+          <div class="db-field"><span class="field-name">payment_status</span><span class="field-type">varchar(20)</span></div>
+          <div class="db-field"><span class="field-name">check_in_status</span><span class="field-type">enum(pending…)</span></div>
+          <div class="db-field"><span class="field-name">adults, children</span><span class="field-type">int</span></div>
+          <div class="db-field"><span class="field-name">service_charges</span><span class="field-type">decimal(10,2)</span></div>
+        </div>
+      </div>
+
+      <div class="db-table-card">
+        <div class="db-table-header">
+          <span>services</span>
+          <small>5 rows</small>
+        </div>
+        <div class="db-fields">
+          <div class="db-field"><span class="field-name"><span class="field-pk">PK</span>id</span><span class="field-type">int</span></div>
+          <div class="db-field"><span class="field-name">service_name</span><span class="field-type">varchar(100)</span></div>
+          <div class="db-field"><span class="field-name">description</span><span class="field-type">text</span></div>
+          <div class="db-field"><span class="field-name">category</span><span class="field-type">varchar(50)</span></div>
+          <div class="db-field"><span class="field-name">price</span><span class="field-type">decimal(10,2)</span></div>
+        </div>
+      </div>
+
+      <div class="db-table-card">
+        <div class="db-table-header">
+          <span>client_services</span>
+          <small>Junction table</small>
+        </div>
+        <div class="db-fields">
+          <div class="db-field"><span class="field-name"><span class="field-pk">PK</span>id</span><span class="field-type">int</span></div>
+          <div class="db-field"><span class="field-name">client_id</span><span class="field-type">FK → clients</span></div>
+          <div class="db-field"><span class="field-name">service_id</span><span class="field-type">FK → services</span></div>
+          <div class="db-field"><span class="field-name">quantity</span><span class="field-type">int (default 1)</span></div>
+          <div class="db-field"><span class="field-name">payment_status</span><span class="field-type">enum(Pending,Paid)</span></div>
+        </div>
+      </div>
+
+      <div class="db-table-card">
+        <div class="db-table-header">
+          <span>feedback</span>
+          <small>1 row</small>
+        </div>
+        <div class="db-fields">
+          <div class="db-field"><span class="field-name"><span class="field-pk">PK</span>id</span><span class="field-type">int</span></div>
+          <div class="db-field"><span class="field-name">client_id</span><span class="field-type">FK → clients</span></div>
+          <div class="db-field"><span class="field-name">rating</span><span class="field-type">int CHECK(1–5)</span></div>
+          <div class="db-field"><span class="field-name">comments</span><span class="field-type">text</span></div>
+          <div class="db-field"><span class="field-name">submitted_date</span><span class="field-type">timestamp</span></div>
+        </div>
+      </div>
+
+      <div class="db-table-card">
+        <div class="db-table-header">
+          <span>staff</span>
+          <small>5 rows</small>
+        </div>
+        <div class="db-fields">
+          <div class="db-field"><span class="field-name"><span class="field-pk">PK</span>id</span><span class="field-type">int</span></div>
+          <div class="db-field"><span class="field-name">full_name, position</span><span class="field-type">varchar</span></div>
+          <div class="db-field"><span class="field-name">email, phone</span><span class="field-type">varchar</span></div>
+          <div class="db-field"><span class="field-name">hire_date</span><span class="field-type">date</span></div>
+          <div class="db-field"><span class="field-name">salary</span><span class="field-type">decimal(10,2)</span></div>
+          <div class="db-field"><span class="field-name">status</span><span class="field-type">enum(active,inactive)</span></div>
+        </div>
+      </div>
+
+      <div class="db-table-card">
+        <div class="db-table-header">
+          <span>rooms</span>
+          <small>Seeded empty</small>
+        </div>
+        <div class="db-fields">
+          <div class="db-field"><span class="field-name"><span class="field-pk">PK</span>id</span><span class="field-type">int</span></div>
+          <div class="db-field"><span class="field-name">room_number</span><span class="field-type">int UNIQUE</span></div>
+          <div class="db-field"><span class="field-name">room_type</span><span class="field-type">varchar(50)</span></div>
+          <div class="db-field"><span class="field-name">floor_id</span><span class="field-type">FK → floors</span></div>
+          <div class="db-field"><span class="field-name">daily_rate</span><span class="field-type">decimal(10,2)</span></div>
+        </div>
+      </div>
+
+      <div class="db-table-card">
+        <div class="db-table-header">
+          <span>floors</span>
+          <small>1 row</small>
+        </div>
+        <div class="db-fields">
+          <div class="db-field"><span class="field-name"><span class="field-pk">PK</span>id</span><span class="field-type">int</span></div>
+          <div class="db-field"><span class="field-name">floor_name</span><span class="field-type">varchar(50) UNIQUE</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5 — SECURITY -->
+  <section class="section" id="security">
+    <div class="section-label">05 — Security Audit</div>
+    <h2>Security Analysis</h2>
+
+    <p>A review of all PHP files reveals a mixed security posture. Several endpoints use secure prepared statements, but critical booking endpoints rely on raw string interpolation, creating serious SQL injection vulnerabilities.</p>
+
+    <div class="findings-list">
+      <div class="finding critical">
+        <div class="finding-badge">Critical</div>
+        <div class="finding-content">
+          <h5>SQL Injection in book.php</h5>
+          <p>Raw user input is directly interpolated into SQL strings (e.g., <code>"SELECT id FROM clients WHERE room_number = $room_num AND check_in &lt; '$out'"</code>). An attacker can manipulate any booking query. Must be rewritten with <code>$conn->prepare()</code> and bound parameters.</p>
+        </div>
+      </div>
+
+      <div class="finding critical">
+        <div class="finding-badge">Critical</div>
+        <div class="finding-content">
+          <h5>No CSRF Protection on Sensitive Forms</h5>
+          <p>Forms in <code>checkout.php</code>, <code>feedback.php</code>, and <code>delete_booking.php</code> perform state-changing actions (payment, deletion) without CSRF tokens. Any authenticated admin can be tricked into triggering these actions via a malicious third-party page.</p>
+        </div>
+      </div>
+
+      <div class="finding critical">
+        <div class="finding-badge">Critical</div>
+        <div class="finding-content">
+          <h5>checkout.php Has No Session Guard</h5>
+          <p><code>checkout.php</code> has no <code>session_start()</code> or <code>$_SESSION['admin_id']</code> check. Any unauthenticated user can access any booking's payment page directly via <code>?id=N</code> and mark it as Paid with a simple POST.</p>
+        </div>
+      </div>
+
+      <div class="finding warning">
+        <div class="finding-badge">Warning</div>
+        <div class="finding-content">
+          <h5>SHA-256 Used for Password Hashing (Not bcrypt)</h5>
+          <p><code>login.php</code> and <code>register.php</code> use <code>hash('sha256', $password)</code>. SHA-256 is a fast hash — it allows rapid brute-force attacks. PHP's <code>password_hash($pass, PASSWORD_BCRYPT)</code> with <code>password_verify()</code> should be used instead.</p>
+        </div>
+      </div>
+
+      <div class="finding warning">
+        <div class="finding-badge">Warning</div>
+        <div class="finding-content">
+          <h5>Hardcoded MySQL Root Credentials in db.php</h5>
+          <p><code>db.php</code> connects as <code>root</code> with an empty password. A dedicated least-privilege database user should be created, and credentials should be stored in environment variables or a config file outside the web root.</p>
+        </div>
+      </div>
+
+      <div class="finding warning">
+        <div class="finding-badge">Warning</div>
+        <div class="finding-content">
+          <h5>invoice.php Has No Authentication Guard</h5>
+          <p>The invoice page fetches and displays full guest data (name, email, price) for any <code>?id=N</code> without checking if a session exists. Any unauthenticated visitor can enumerate booking invoices.</p>
+        </div>
+      </div>
+
+      <div class="finding info">
+        <div class="finding-badge">Notice</div>
+        <div class="finding-content">
+          <h5>Duplicate Booking Handlers (book.php vs booking.php)</h5>
+          <p>Two nearly identical files handle booking creation/updates. <code>book.php</code> uses raw queries (vulnerable); <code>booking.php</code> uses the same raw queries but with different validation messages (French comments). These should be merged into one secure, prepared-statement-based file.</p>
+        </div>
+      </div>
+
+      <div class="finding info">
+        <div class="finding-badge">Notice</div>
+        <div class="finding-content">
+          <h5>feedback.php Creates Tables at Runtime</h5>
+          <p>The feedback page runs <code>CREATE TABLE IF NOT EXISTS</code> and <code>ALTER TABLE</code> on every page load. This is a development convenience that should be replaced with proper database migration scripts in production.</p>
+        </div>
+      </div>
+
+      <div class="finding positive">
+        <div class="finding-badge">Good</div>
+        <div class="finding-content">
+          <h5>Prepared Statements Used in Auth, Delete, Check-in</h5>
+          <p><code>login.php</code>, <code>register.php</code>, <code>delete_booking.php</code>, <code>checkin.php</code>, <code>update_check_status.php</code>, <code>pay_service.php</code>, and <code>feedback.php</code> all correctly use <code>$conn->prepare()</code> with bound parameters.</p>
+        </div>
+      </div>
+
+      <div class="finding positive">
+        <div class="finding-badge">Good</div>
+        <div class="finding-content">
+          <h5>Output Escaping with htmlspecialchars()</h5>
+          <p>Displayed user-supplied values use <code>htmlspecialchars()</code> consistently across templates, preventing reflected XSS. The admin name in the sidebar and all client fields are properly escaped.</p>
+        </div>
+      </div>
+
+      <div class="finding positive">
+        <div class="finding-badge">Good</div>
+        <div class="finding-content">
+          <h5>Strong Password Policy on Registration</h5>
+          <p><code>register.php</code> enforces a regex requiring uppercase, lowercase, digit, special character, and minimum 8 characters. This is a solid baseline for admin account creation.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6 — RECOMMENDATIONS -->
+  <section class="section" id="recommendations">
+    <div class="section-label">06 — Action Plan</div>
+    <h2>Recommendations</h2>
+
+    <div class="rec-grid">
+      <div class="rec-card">
+        <div class="priority-tag priority-high">High Priority</div>
+        <div class="rec-number">01</div>
+        <h4>Rewrite book.php with Prepared Statements</h4>
+        <p>Replace all string-interpolated SQL in <code>book.php</code> and <code>booking.php</code> with <code>$conn->prepare()</code>. Merge both files into a single, secure endpoint.</p>
+      </div>
+
+      <div class="rec-card">
+        <div class="priority-tag priority-high">High Priority</div>
+        <div class="rec-number">02</div>
+        <h4>Add Session Guards to checkout.php & invoice.php</h4>
+        <p>Both pages must call <code>session_start()</code> and verify <code>$_SESSION['admin_id']</code> before serving any content or processing POST data.</p>
+      </div>
+
+      <div class="rec-card">
+        <div class="priority-tag priority-high">High Priority</div>
+        <div class="rec-number">03</div>
+        <h4>Implement CSRF Tokens</h4>
+        <p>Generate a per-session CSRF token, embed it in all forms as a hidden field, and validate it server-side before processing any state-changing request.</p>
+      </div>
+
+      <div class="rec-card">
+        <div class="priority-tag priority-high">High Priority</div>
+        <div class="rec-number">04</div>
+        <h4>Switch to password_hash / password_verify</h4>
+        <p>Replace <code>hash('sha256', …)</code> with PHP's native <code>password_hash($pass, PASSWORD_BCRYPT)</code> and <code>password_verify()</code> for all admin password operations.</p>
+      </div>
+
+      <div class="rec-card">
+        <div class="priority-tag priority-medium">Medium Priority</div>
+        <div class="rec-number">05</div>
+        <h4>Move Credentials to Environment Variables</h4>
+        <p>Store MySQL credentials in a <code>.env</code> file (loaded via <code>phpdotenv</code>) or server environment variables. Create a dedicated least-privilege DB user instead of using root.</p>
+      </div>
+
+      <div class="rec-card">
+        <div class="priority-tag priority-medium">Medium Priority</div>
+        <div class="rec-number">06</div>
+        <h4>Populate and Use the rooms Table</h4>
+        <p>The <code>rooms</code> table exists in the schema but contains no data. Room availability checks rely on the <code>clients</code> table alone. Populating <code>rooms</code> enables proper room inventory management.</p>
+      </div>
+
+      <div class="rec-card">
+        <div class="priority-tag priority-medium">Medium Priority</div>
+        <div class="rec-number">07</div>
+        <h4>Move DDL Out of Application Code</h4>
+        <p>Remove <code>CREATE TABLE IF NOT EXISTS</code> and <code>ALTER TABLE</code> from <code>feedback.php</code>. Use versioned database migration scripts (e.g., Phinx) instead.</p>
+      </div>
+
+      <div class="rec-card">
+        <div class="priority-tag priority-low">Low Priority</div>
+        <div class="rec-number">08</div>
+        <h4>Implement Real Payment Processing</h4>
+        <p><code>checkout.php</code> collects card data but performs no real processing. Integrate a gateway (Stripe, PayPal) or remove the form entirely and use an external payment link flow.</p>
+      </div>
+
+      <div class="rec-card">
+        <div class="priority-tag priority-low">Low Priority</div>
+        <div class="rec-number">09</div>
+        <h4>Add Input Validation for Email Fields</h4>
+        <p>The database contains entries like <code>kakagmail.com</code> and <code>kljıof3rn.cm</code> — invalid emails accepted without server-side validation. Use PHP's <code>filter_var($email, FILTER_VALIDATE_EMAIL)</code>.</p>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+
+
+</body>
+</html>
